@@ -4,6 +4,9 @@ export const adminApi = {
     // Stats
     getOverview: () => request.get('/api/admin/stats/overview'),
     getAiLogs: (page = 1, size = 20) => request.get('/api/admin/stats/ai-logs', { params: { page, size } }),
+    getUserGrowthTrend: () => request.get('/api/admin/stats/user-growth'),
+    getAiCallsTrend: () => request.get('/api/admin/stats/ai-calls-trend'),
+    getTokenStats: () => request.get('/api/admin/stats/token-stats'),
 
     // Users
     getUsers: (page = 1, size = 16, keyword = '') => request.get('/api/admin/users', { params: { page, size, keyword } }),

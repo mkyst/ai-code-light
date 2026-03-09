@@ -15,7 +15,7 @@
         </button>
       </nav>
       <div class="sidebar-footer">
-        <router-link to="/" class="back-link">← 返回前台</router-link>
+        <router-link to="/workspace" class="back-link">← 返回前台</router-link>
       </div>
     </aside>
 
@@ -42,12 +42,101 @@
         <!-- Quick charts -->
         <div class="charts-row">
           <div class="chart-card glass-card">
-            <h4>📈 最近 AI 调用记录</h4>
+            <h4>📈 用户增长趋势（最近7天）</h4>
+            <div class="mini-chart">
+              <div class="chart-bars">
+                <div v-for="(day, i) in userGrowthData" :key="i" class="bar-item">
+                  <div class="bar-wrapper">
+                    <div class="bar" :style="{ height: (day.count / maxUserGrowth * 100) + '%' }">
+                      <span class="bar-value">{{ day.count }}</span>
+                    </div>
+                  </div>
+                  <span class="bar-label">{{ day.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card glass-card">
+            <h4>🤖 AI 调用趋势（最近7天）</h4>
+            <div class="mini-chart">
+              <div class="chart-bars">
+                <div v-for="(day, i) in aiCallsData" :key="i" class="bar-item">
+                  <div class="bar-wrapper">
+                    <div class="bar ai-bar" :style="{ height: (day.count / maxAiCalls * 100) + '%' }">
+                      <span class="bar-value">{{ day.count }}</span>
+                    </div>
+                  </div>
+                  <span class="bar-label">{{ day.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card glass-card">
+            <h4>📱 应用状态分布</h4>
+            <div class="pie-chart-container">
+              <div class="pie-chart" :style="{
+                '--percentage-done': appStatusData.done + '%',
+                '--percentage-published': appStatusData.published + '%',
+                '--percentage-generating': appStatusData.generating + '%'
+              }"></div>
+              <div class="pie-legend">
+                <div class="legend-item">
+                  <span class="legend-dot done"></span>
+                  <span>已完成</span>
+                  <span class="legend-value">{{ appStatusData.doneCount }}</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot published"></span>
+                  <span>已发布</span>
+                  <span class="legend-value">{{ appStatusData.publishedCount }}</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot generating"></span>
+                  <span>生成中</span>
+                  <span class="legend-value">{{ appStatusData.generatingCount }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card glass-card">
+            <h4>💎 Token 消耗统计</h4>
+            <div class="token-stats">
+              <div class="token-stat-item">
+                <div class="token-stat-icon">📊</div>
+                <div class="token-stat-info">
+                  <div class="token-stat-label">总消耗</div>
+                  <div class="token-stat-value">{{ formatNumber(tokenStats.total) }}</div>
+                </div>
+              </div>
+              <div class="token-stat-item">
+                <div class="token-stat-icon">📈</div>
+                <div class="token-stat-info">
+                  <div class="token-stat-label">今日消耗</div>
+                  <div class="token-stat-value">{{ formatNumber(tokenStats.today) }}</div>
+                </div>
+              </div>
+              <div class="token-stat-item">
+                <div class="token-stat-icon">⚡</div>
+                <div class="token-stat-info">
+                  <div class="token-stat-label">平均每次</div>
+                  <div class="token-stat-value">{{ formatNumber(tokenStats.average) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card glass-card">
+            <h4>📋 最近 AI 调用记录</h4>
             <div class="ai-log-mini">
-              <div v-for="log in aiLogs.slice(0, 8)" :key="log.id" class="log-row">
+              <div v-for="log in aiLogs.slice(0, 6)" :key="log.id" class="log-row">
                 <span class="log-user">用户 #{{ log.userId }}</span>
                 <span class="log-app">App #{{ log.appId }}</span>
-                <span class="log-tokens">{{ log.tokens }} tokens</span>
+                <span class="log-tokens">{{ getTotalTokens(log) }} tokens</span>
                 <span class="log-time">{{ formatDateTime(log.createdAt) }}</span>
               </div>
               <div v-if="aiLogs.length === 0" class="no-data">暂无记录</div>
@@ -193,7 +282,7 @@
                 <td class="td-id">#{{ log.id }}</td>
                 <td>#{{ log.userId }}</td>
                 <td>#{{ log.appId }}</td>
-                <td><span class="token-badge">{{ log.tokens ?? 'N/A' }} tokens</span></td>
+                <td><span class="token-badge">{{ getTotalTokens(log) }} tokens</span></td>
                 <td>{{ formatDateTime(log.createdAt) }}</td>
               </tr>
               <tr v-if="aiLogs.length === 0">
@@ -208,7 +297,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { adminApi } from '../api/admin'
 import { Message, Modal } from '@arco-design/web-vue'
 
@@ -223,6 +312,49 @@ const apps = ref([])
 const appPage = ref(1)
 const appTotal = ref(0)
 const appStatusFilter = ref('')
+
+// Chart data from API
+const userGrowthData = ref([])
+const aiCallsData = ref([])
+const tokenStats = ref({ total: 0, today: 0, average: 0 })
+
+const maxUserGrowth = computed(() => {
+  const counts = userGrowthData.value.map(d => d.count)
+  return counts.length > 0 ? Math.max(...counts, 1) : 1
+})
+
+const maxAiCalls = computed(() => {
+  const counts = aiCallsData.value.map(d => d.count)
+  return counts.length > 0 ? Math.max(...counts, 1) : 1
+})
+
+const appStatusData = computed(() => {
+  const total = apps.value.length || 1
+  const doneCount = apps.value.filter(a => a.status === 'DONE').length
+  const publishedCount = apps.value.filter(a => a.status === 'PUBLISHED').length
+  const generatingCount = apps.value.filter(a => a.status === 'GENERATING').length
+
+  return {
+    doneCount,
+    publishedCount,
+    generatingCount,
+    done: (doneCount / total * 100).toFixed(1),
+    published: (publishedCount / total * 100).toFixed(1),
+    generating: (generatingCount / total * 100).toFixed(1)
+  }
+})
+
+const formatNumber = (num) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
+  return num.toString()
+}
+
+const getTotalTokens = (log) => {
+  const prompt = log.promptTokens || 0
+  const completion = log.completionTokens || 0
+  return prompt + completion
+}
 
 const navItems = [
   { key: 'overview', icon: '📊', label: '数据概览' },
@@ -252,8 +384,15 @@ async function loadOverview() {
     console.log('Loading overview data...')
     overviewData.value = await adminApi.getOverview()
     console.log('Overview data loaded:', overviewData.value)
+
+    // Load AI logs
     const logRes = await adminApi.getAiLogs()
     aiLogs.value = logRes.records || []
+
+    // Load trend data
+    userGrowthData.value = await adminApi.getUserGrowthTrend()
+    aiCallsData.value = await adminApi.getAiCallsTrend()
+    tokenStats.value = await adminApi.getTokenStats()
   } catch (e) {
     console.error('Failed to load overview:', e)
     Message.error('加载数据概览失败：' + (e.response?.data?.message || e.message))
@@ -377,9 +516,60 @@ onMounted(async () => {
 .today-badge { font-size: 11px; background: rgba(108,92,231,0.2); color: var(--accent-secondary); padding: 2px 8px; border-radius: 20px; }
 
 /* Charts */
-.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .chart-card { padding: 20px; }
-.chart-card h4 { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
+.chart-card h4 { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; font-weight: 600; }
+
+/* Bar Chart */
+.mini-chart { height: 180px; }
+.chart-bars { display: flex; align-items: flex-end; justify-content: space-between; height: 140px; gap: 8px; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.bar-wrapper { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.bar {
+  width: 100%; background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 6px 6px 0 0; position: relative; min-height: 4px;
+  transition: all 0.3s ease; display: flex; align-items: flex-start; justify-content: center; padding-top: 4px;
+}
+.bar:hover { opacity: 0.8; transform: scaleY(1.05); }
+.bar.ai-bar { background: linear-gradient(180deg, #00cc98, #00a67e); }
+.bar-value { font-size: 11px; font-weight: 600; color: white; }
+.bar-label { font-size: 11px; color: var(--text-muted); }
+
+/* Pie Chart */
+.pie-chart-container { display: flex; align-items: center; gap: 24px; padding: 12px 0; }
+.pie-chart {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: conic-gradient(
+    #6c5ce7 0% var(--percentage-done, 0%),
+    #00cc98 var(--percentage-done, 0%) calc(var(--percentage-done, 0%) + var(--percentage-published, 0%)),
+    #fdcb6e calc(var(--percentage-done, 0%) + var(--percentage-published, 0%)) 100%
+  );
+  position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.pie-chart::after {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 60px; height: 60px; background: var(--bg-card); border-radius: 50%;
+}
+.pie-legend { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+.legend-dot.done { background: #6c5ce7; }
+.legend-dot.published { background: #00cc98; }
+.legend-dot.generating { background: #fdcb6e; }
+.legend-value { margin-left: auto; font-weight: 600; color: var(--text-primary); }
+
+/* Token Stats */
+.token-stats { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+.token-stat-item {
+  display: flex; align-items: center; gap: 16px; padding: 16px;
+  background: var(--bg-card); border-radius: 12px; transition: var(--transition);
+}
+.token-stat-item:hover { transform: translateX(4px); background: rgba(108,92,231,0.05); }
+.token-stat-icon { font-size: 32px; line-height: 1; }
+.token-stat-info { flex: 1; }
+.token-stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.token-stat-value { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+
 .ai-log-mini { display: flex; flex-direction: column; gap: 8px; }
 .log-row { display: flex; align-items: center; gap: 12px; font-size: 12px; padding: 6px 8px; background: var(--bg-card); border-radius: 6px; }
 .log-user, .log-app { color: var(--accent-secondary); font-family: monospace; }

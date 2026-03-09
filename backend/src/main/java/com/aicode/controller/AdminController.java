@@ -145,6 +145,97 @@ public class AdminController {
                 new LambdaQueryWrapper<AiLog>().orderByDesc(AiLog::getCreatedAt)));
     }
 
+    @Operation(summary = "用户增长趋势（最近7天）")
+    @GetMapping("/stats/user-growth")
+    public Result<List<Map<String, Object>>> userGrowthTrend() {
+        requireAdmin();
+        List<Map<String, Object>> trend = new java.util.ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime dayStart = now.minusDays(i).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime dayEnd = dayStart.plusDays(1);
+
+            long count = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                    .ge(User::getCreatedAt, dayStart)
+                    .lt(User::getCreatedAt, dayEnd)
+            );
+
+            Map<String, Object> dayData = new HashMap<>();
+            dayData.put("label", String.format("%d/%d", dayStart.getMonthValue(), dayStart.getDayOfMonth()));
+            dayData.put("count", count);
+            trend.add(dayData);
+        }
+
+        return Result.success(trend);
+    }
+
+    @Operation(summary = "AI调用趋势（最近7天）")
+    @GetMapping("/stats/ai-calls-trend")
+    public Result<List<Map<String, Object>>> aiCallsTrend() {
+        requireAdmin();
+        List<Map<String, Object>> trend = new java.util.ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime dayStart = now.minusDays(i).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime dayEnd = dayStart.plusDays(1);
+
+            long count = aiLogMapper.selectCount(
+                new LambdaQueryWrapper<AiLog>()
+                    .ge(AiLog::getCreatedAt, dayStart)
+                    .lt(AiLog::getCreatedAt, dayEnd)
+            );
+
+            Map<String, Object> dayData = new HashMap<>();
+            dayData.put("label", String.format("%d/%d", dayStart.getMonthValue(), dayStart.getDayOfMonth()));
+            dayData.put("count", count);
+            trend.add(dayData);
+        }
+
+        return Result.success(trend);
+    }
+
+    @Operation(summary = "Token消耗统计")
+    @GetMapping("/stats/token-stats")
+    public Result<Map<String, Object>> tokenStats() {
+        requireAdmin();
+        Map<String, Object> stats = new HashMap<>();
+
+        // 获取所有日志计算总Token
+        List<AiLog> allLogs = aiLogMapper.selectList(null);
+        long totalTokens = allLogs.stream()
+            .mapToLong(log -> {
+                int prompt = log.getPromptTokens() != null ? log.getPromptTokens() : 0;
+                int completion = log.getCompletionTokens() != null ? log.getCompletionTokens() : 0;
+                return prompt + completion;
+            })
+            .sum();
+
+        // 今日Token
+        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        List<AiLog> todayLogs = aiLogMapper.selectList(
+            new LambdaQueryWrapper<AiLog>().ge(AiLog::getCreatedAt, todayStart)
+        );
+        long todayTokens = todayLogs.stream()
+            .mapToLong(log -> {
+                int prompt = log.getPromptTokens() != null ? log.getPromptTokens() : 0;
+                int completion = log.getCompletionTokens() != null ? log.getCompletionTokens() : 0;
+                return prompt + completion;
+            })
+            .sum();
+
+        // 平均Token
+        long avgTokens = allLogs.isEmpty() ? 0 : totalTokens / allLogs.size();
+
+        stats.put("total", totalTokens);
+        stats.put("today", todayTokens);
+        stats.put("average", avgTokens);
+
+        return Result.success(stats);
+    }
+
     @Operation(summary = "精选应用列表（公开）")
     @GetMapping("/featured")
     public Result<List<App>> featuredApps() {

@@ -1,6 +1,8 @@
 package com.aicode.ai;
 
 import com.aicode.ai.tools.CodeGenerationTools;
+import com.aicode.entity.AiLog;
+import com.aicode.mapper.AiLogMapper;
 import com.aicode.service.AppService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,6 +29,7 @@ public class AiCodeGenerationService {
     private final ChatLanguageModel chatLanguageModel;
     private final AppService appService;
     private final ObjectProvider<CodeGenerationTools> toolsProvider;
+    private final AiLogMapper aiLogMapper;
 
     public SseEmitter generateCode(Long userId, Long appId, String userPrompt) {
         SseEmitter emitter = new SseEmitter(300_000L);
@@ -55,6 +59,8 @@ public class AiCodeGenerationService {
             try {
                 sendSseEvent(emitter, "thinking", "{\"message\":\"🤔 AI正在分析需求，规划代码架构...\"}");
 
+                long startTime = System.currentTimeMillis();
+
                 // Build AiServices with tool calling (synchronous for proper tool execution)
                 CodeAssistant assistant = AiServices.builder(CodeAssistant.class)
                         .chatLanguageModel(chatLanguageModel)
@@ -64,6 +70,8 @@ public class AiCodeGenerationService {
                 // Run in thread to avoid blocking
                 String result = assistant.chat(buildSystemPrompt(userPrompt));
 
+                long endTime = System.currentTimeMillis();
+
                 // Save to db
                 appService.updateAppStatus(
                         appId, "DONE",
@@ -71,6 +79,9 @@ public class AiCodeGenerationService {
                         tools.getCssContent(),
                         tools.getJsContent(),
                         tools.getAppTitle());
+
+                // Log AI call (estimate tokens based on content length)
+                logAiCall(userId, appId, userPrompt, result, endTime - startTime);
 
                 sendSseEvent(emitter, "done",
                         "{\"appId\":" + appId +
@@ -118,5 +129,41 @@ public class AiCodeGenerationService {
         } catch (IOException e) {
             log.warn("SSE send failed: {}", e.getMessage());
         }
+    }
+
+    private void logAiCall(Long userId, Long appId, String prompt, String response, long durationMs) {
+        try {
+            AiLog aiLog = new AiLog();
+            aiLog.setUserId(userId);
+            aiLog.setAppId(appId);
+            aiLog.setModel("qwen-plus"); // 通义千问模型
+
+            // Estimate tokens (rough approximation: 1 token ≈ 4 chars for Chinese, 1 token ≈ 4 chars for English)
+            int promptTokens = estimateTokens(prompt);
+            int completionTokens = estimateTokens(response);
+
+            aiLog.setPromptTokens(promptTokens);
+            aiLog.setCompletionTokens(completionTokens);
+
+            // Estimate cost (example: 0.0008 yuan per 1K tokens for qwen-plus)
+            double totalTokens = promptTokens + completionTokens;
+            aiLog.setCost(totalTokens / 1000.0 * 0.0008);
+
+            aiLog.setCreatedAt(LocalDateTime.now());
+            aiLogMapper.insert(aiLog);
+
+            log.info("AI call logged: userId={}, appId={}, promptTokens={}, completionTokens={}, duration={}ms",
+                    userId, appId, promptTokens, completionTokens, durationMs);
+        } catch (Exception e) {
+            log.error("Failed to log AI call", e);
+        }
+    }
+
+    private int estimateTokens(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        // Rough estimation: average 3.5 characters per token for mixed Chinese/English
+        return (int) Math.ceil(text.length() / 3.5);
     }
 }
