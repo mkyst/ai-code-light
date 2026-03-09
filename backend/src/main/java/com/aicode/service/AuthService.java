@@ -60,6 +60,33 @@ public class AuthService {
         return buildUserResponse(user, token);
     }
 
+    public User updateProfile(Long userId, String username, String avatar) {
+        if (username != null && !username.isBlank()) {
+            long count = userMapper.selectCount(new LambdaQueryWrapper<User>()
+                    .eq(User::getUsername, username)
+                    .ne(User::getId, userId));
+            if (count > 0) throw BusinessException.of("用户名已存在");
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null) throw BusinessException.notFound("用户");
+        if (username != null && !username.isBlank()) user.setUsername(username);
+        if (avatar != null && !avatar.isBlank()) user.setAvatar(avatar);
+        user.setUpdatedAt(LocalDateTime.now());
+        userMapper.updateById(user);
+        return user;
+    }
+
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userMapper.selectById(userId);
+        if (user == null) throw BusinessException.notFound("用户");
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw BusinessException.of("原密码错误");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        userMapper.updateById(user);
+    }
+
     public User getCurrentUser(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null)

@@ -1,12 +1,17 @@
 server:
   port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
     name: ai-code-platform
   datasource:
     url: jdbc:mysql://localhost:3306/ai_code?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: ${DB_USERNAME:root}
+    username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
@@ -19,6 +24,10 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
   jackson:
     time-zone: Asia/Shanghai
     date-format: yyyy-MM-dd HH:mm:ss
@@ -48,6 +57,7 @@ langchain4j:
       model-name: qwen-plus
       temperature: 0.7
       max-tokens: 8192
+      timeout: PT300S
       log-requests: true
       log-responses: true
     streaming-chat-model:
@@ -56,6 +66,7 @@ langchain4j:
       model-name: qwen-plus
       temperature: 0.7
       max-tokens: 8192
+      timeout: PT300S
       log-requests: true
       log-responses: true
 

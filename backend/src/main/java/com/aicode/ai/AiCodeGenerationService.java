@@ -5,8 +5,7 @@ import com.aicode.service.AppService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.service.AiServices;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class AiCodeGenerationService {
 
-    private final StreamingChatLanguageModel streamingChatLanguageModel;
+    private final ChatLanguageModel chatLanguageModel;
     private final AppService appService;
     private final ObjectProvider<CodeGenerationTools> toolsProvider;
 
@@ -58,7 +57,7 @@ public class AiCodeGenerationService {
 
                 // Build AiServices with tool calling (synchronous for proper tool execution)
                 CodeAssistant assistant = AiServices.builder(CodeAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .tools(tools)
                         .build();
 
@@ -107,7 +106,7 @@ public class AiCodeGenerationService {
                 6. 代码必须能独立运行，HTML文件需内嵌CSS和JS的引用关系
                 7. 使用现代CSS特性（flex/grid布局、CSS变量、动画）
                 8. 页面要有响应式设计，支持移动端
-                9. 生成的代码要丰富、完整，不能是简陋的示例
+                9. 【重要】每个文件的代码量要精简，HTML不超过150行，CSS不超过200行，JS不超过150行，避免冗余代码
 
                 用户需求：%s
                 """.formatted(userPrompt);

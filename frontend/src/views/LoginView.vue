@@ -38,7 +38,6 @@
           <button type="submit" class="glow-btn submit-btn" :disabled="loading">
             {{ loading ? '登录中...' : '🚀 立即登录' }}
           </button>
-          <p class="demo-hint">演示账号：admin@aicode.com / admin123456</p>
         </form>
 
         <!-- Register Form -->
@@ -156,25 +155,25 @@ async function handleRegister() {
 /* ── Native inputs — no more white arco box ── */
 .form-input {
   width: 100%; box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 11px 14px;
-  color: #e8eaf0;
+  color: var(--text-primary);
   font-size: 14px;
   font-family: 'Inter', sans-serif;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.form-input::placeholder { color: rgba(255, 255, 255, 0.22); }
+.form-input::placeholder { color: var(--text-muted); }
 .form-input:hover:not(:focus) {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(255, 255, 255, 0.9);
 }
 .form-input:focus {
-  border-color: rgba(126, 87, 255, 0.65);
-  background: rgba(126, 87, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(126, 87, 255, 0.15);
+  border-color: var(--accent-primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 /* Password eye toggle */
@@ -183,12 +182,11 @@ async function handleRegister() {
 .eye-btn {
   position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
   background: none; border: none; cursor: pointer; font-size: 15px;
-  color: rgba(255,255,255,0.3); padding: 0; line-height: 1; transition: color 0.2s;
+  color: var(--text-muted); padding: 0; line-height: 1; transition: color 0.2s;
 }
-.eye-btn:hover { color: rgba(255,255,255,0.6); }
+.eye-btn:hover { color: var(--accent-primary); }
 
 /* Submit */
 .submit-btn { width: 100%; font-size: 15px; padding: 13px; margin-top: 8px; }
 .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.demo-hint { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 14px; }
 </style>

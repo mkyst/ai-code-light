@@ -379,9 +379,9 @@ onMounted(async () => {
 /* Table */
 .data-table { padding: 0; overflow: hidden; }
 .table { width: 100%; border-collapse: collapse; }
-.table th { padding: 12px 16px; text-align: left; font-size: 12px; color: var(--text-muted); font-weight: 600; background: var(--bg-card); border-bottom: 1px solid var(--border); white-space: nowrap; }
-.table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-.table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.table th { padding: 12px 16px; text-align: left; font-size: 12px; color: var(--text-muted); font-weight: 600; background: rgba(99,102,241,0.05); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+.table tbody tr:hover { background: rgba(0,0,0,0.02); }
 .table tbody tr:last-child td { border-bottom: none; }
 .td-id { color: var(--text-muted); font-family: monospace; font-size: 12px; }
 .td-name { font-weight: 500; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/api/edit/stream", // SSE edit - auth via token param
                                 "/api/apps/public/**",
                                 "/share/**", // Public share pages
-                                "/embed/**") // Embed view
+                                "/embed/**", // Embed view
+                                "/uploads/**") // Uploaded files (avatars etc)
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

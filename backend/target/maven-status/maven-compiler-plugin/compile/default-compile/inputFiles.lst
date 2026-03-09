@@ -10,12 +10,15 @@ F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\common\util\JwtUt
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\common\util\SecurityUtil.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\config\MybatisPlusConfig.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\config\SecurityConfig.java
+F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\config\WebMvcConfig.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\AdminController.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\AiController.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\AppController.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\AuthController.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\EditController.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\ShareController.java
+F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\UploadController.java
+F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\controller\UserController.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\entity\AiLog.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\entity\App.java
 F:\AntigravityProject\ai-code\backend\src\main\java\com\aicode\entity\AppVersion.java

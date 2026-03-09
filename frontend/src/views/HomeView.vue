@@ -13,8 +13,8 @@
           <router-link v-if="!userStore.isLoggedIn" to="/login" class="nav-btn">登录 / 注册</router-link>
           <template v-else>
             <router-link to="/workspace" class="nav-btn">开始创作</router-link>
-            <a-avatar :size="36" class="avatar-btn" @click="goToApps">
-              <img :src="userStore.user?.avatar" />
+            <a-avatar :size="36" class="avatar-btn" @click="goToProfile">
+              <img :src="resolveAvatar(userStore.user?.avatar)" />
             </a-avatar>
           </template>
         </nav>
@@ -138,14 +138,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const goToApps = () => router.push('/apps')
+// Fetch latest user data on mount if logged in
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    userStore.fetchMe().catch(() => {})
+  }
+})
+
+const goToProfile = () => router.push('/profile')
+const resolveAvatar = (url) => (url && url.startsWith('/uploads')) ? 'http://localhost:8080' + url : (url || '')
 
 const codeLines = [
   '<span class="kw">const</span> <span class="fn">createApp</span> = <span class="kw">async</span> (prompt) => {',
@@ -170,12 +178,12 @@ const features = [
 ]
 
 const showcaseApps = [
-  { id: 1, emoji: '🌙', title: '星空日历', desc: '美观的日历应用，带动画效果', bg: 'linear-gradient(135deg, #0f3460, #16213e)' },
-  { id: 2, emoji: '📊', title: '数据看板', desc: '实时数据可视化仪表盘', bg: 'linear-gradient(135deg, #1a1a2e, #16213e)' },
-  { id: 3, emoji: '🎮', title: '贪吃蛇游戏', desc: '经典游戏的现代化重制', bg: 'linear-gradient(135deg, #0d1117, #161b22)' },
-  { id: 4, emoji: '🎵', title: '音乐播放器', desc: '带可视化效果的音乐播放器', bg: 'linear-gradient(135deg, #1e0338, #3d0066)' },
-  { id: 5, emoji: '📝', title: 'Todo 应用', desc: '简洁美观的任务管理工具', bg: 'linear-gradient(135deg, #003049, #005f73)' },
-  { id: 6, emoji: '🌤', title: '天气助手', desc: '实时天气查询与预报', bg: 'linear-gradient(135deg, #184e77, #1e6091)' }
+  { id: 1, emoji: '🌙', title: '星空日历', desc: '美观的日历应用，带动画效果', bg: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)' },
+  { id: 2, emoji: '📊', title: '数据看板', desc: '实时数据可视化仪表盘', bg: 'linear-gradient(135deg, #e0f2fe, #bae6fd)' },
+  { id: 3, emoji: '🎮', title: '贪吃蛇游戏', desc: '经典游戏的现代化重制', bg: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)' },
+  { id: 4, emoji: '🎵', title: '音乐播放器', desc: '带可视化效果的音乐播放器', bg: 'linear-gradient(135deg, #f3e8ff, #e9d5ff)' },
+  { id: 5, emoji: '📝', title: 'Todo 应用', desc: '简洁美观的任务管理工具', bg: 'linear-gradient(135deg, #ecfeff, #cffafe)' },
+  { id: 6, emoji: '🌤', title: '天气助手', desc: '实时天气查询与预报', bg: 'linear-gradient(135deg, #f0fdf4, #dcfce7)' }
 ]
 </script>
 
@@ -186,7 +194,7 @@ const showcaseApps = [
 .header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   backdrop-filter: blur(20px);
-  background: rgba(10, 10, 15, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   border-bottom: 1px solid var(--border);
 }
 .header-inner {
@@ -268,11 +276,11 @@ const showcaseApps = [
   animation: fadeInUp 0.4s ease both;
 }
 .line-num { color: var(--text-muted); font-size: 13px; min-width: 20px; font-family: monospace; }
-.line-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; color: #abb2bf; }
-:deep(.kw) { color: #c678dd; }
-:deep(.fn) { color: #61afef; }
-:deep(.cm) { color: #5c6370; font-style: italic; }
-:deep(.bool) { color: #d19a66; }
+.line-text { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; color: #334155; }
+:deep(.kw) { color: #9333ea; }
+:deep(.fn) { color: #2563eb; }
+:deep(.cm) { color: #94a3b8; font-style: italic; }
+:deep(.bool) { color: #ea580c; }
 
 /* Sections */
 .features, .showcase { max-width: 1200px; margin: 0 auto; padding: 80px 24px; }
@@ -298,7 +306,7 @@ const showcaseApps = [
 /* CTA */
 .cta { max-width: 800px; margin: 0 auto 80px; padding: 0 24px; }
 .cta-content { text-align: center; padding: 60px 40px; }
-.cta-content h2 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+.cta-content h2 { font-size: 36px; font-weight: 800; margin-bottom: 12px; color: var(--text-primary); }
 .cta-content p { color: var(--text-secondary); margin-bottom: 32px; font-size: 16px; }
 
 /* Footer */

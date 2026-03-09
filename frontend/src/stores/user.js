@@ -36,7 +36,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function fetchMe() {
-        const res = await authApi.me()
+        const res = await authApi.getProfile()
         user.value = res
         localStorage.setItem('user', JSON.stringify(res))
         return res

@@ -34,8 +34,8 @@
         <router-link to="/apps">
           <a-button size="small">我的应用</a-button>
         </router-link>
-        <a-avatar :size="30">
-          <img :src="userStore.user?.avatar" />
+        <a-avatar :size="30" style="cursor: pointer" @click="router.push('/profile')">
+          <img :src="resolveAvatar(userStore.user?.avatar)" />
         </a-avatar>
       </div>
     </header>
@@ -201,6 +201,7 @@ import { editApi } from '../api/edit'
 import { Message } from '@arco-design/web-vue'
 
 const router = useRouter()
+const resolveAvatar = (url) => (url && url.startsWith('/uploads')) ? 'http://localhost:8080' + url : (url || '')
 const route = useRoute()
 const userStore = useUserStore()
 
@@ -493,6 +494,11 @@ const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN', { month: 'nume
 
 // Load existing app if appId is passed in query
 onMounted(async () => {
+  // Fetch latest user data
+  if (userStore.isLoggedIn) {
+    userStore.fetchMe().catch(() => {})
+  }
+
   setupIframeListener()
   const appId = route.query.appId
   if (appId) {
@@ -584,7 +590,7 @@ onMounted(async () => {
 
 /* Messages */
 .message { margin-bottom: 10px; }
-.user-message { background: var(--accent-primary); border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 90%; margin-left: auto; font-size: 14px; }
+.user-message { background: rgba(99,102,241,0.1); border: 1px solid var(--border-active); color: var(--accent-secondary); border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 90%; margin-left: auto; font-size: 14px; }
 .thinking-message, .tool-message { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; background: var(--bg-card); border-radius: 8px; font-size: 13px; color: var(--text-secondary); }
 .done-message { display: flex; align-items: center; gap: 8px; padding: 10px; background: rgba(0,206,201,0.1); border: 1px solid rgba(0,206,201,0.3); border-radius: 8px; font-size: 13px; color: var(--accent-teal); }
 .error-message { display: flex; align-items: center; gap: 8px; padding: 10px; background: rgba(255,100,100,0.1); border-radius: 8px; color: #ff6b6b; font-size: 13px; }
@@ -627,14 +633,14 @@ onMounted(async () => {
 .code-tab { padding: 5px 14px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-size: 13px; transition: var(--transition); font-family: 'Inter', sans-serif; }
 .code-tab.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
 .code-editor-wrapper { flex: 1; overflow: auto; padding: 16px; }
-.code-content { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.6; color: #abb2bf; white-space: pre-wrap; word-break: break-all; }
+.code-content { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.6; color: #334155; white-space: pre-wrap; word-break: break-all; }
 
 /* Version Sidebar */
 .version-sidebar {
   position: absolute; right: 0; top: 0; bottom: 0; width: 300px;
   background: var(--bg-secondary); border-left: 1px solid var(--border);
   display: flex; flex-direction: column; z-index: 50;
-  box-shadow: -8px 0 24px rgba(0,0,0,0.4);
+  box-shadow: -8px 0 24px rgba(0,0,0,0.1);
 }
 .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); }
 .sidebar-header h4 { font-size: 15px; font-weight: 600; }

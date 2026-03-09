@@ -253,7 +253,7 @@ onMounted(async () => {
 }
 .code-tab-mini.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
 .code-preview {
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #abb2bf;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #334155;
   line-height: 1.5; white-space: pre-wrap; word-break: break-all; max-height: 320px; overflow-y: auto;
 }
 .detail-right { padding: 20px; overflow: hidden; }

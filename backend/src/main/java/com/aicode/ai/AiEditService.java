@@ -9,7 +9,7 @@ import com.aicode.service.ChatMessageService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class AiEditService {
 
-    private final StreamingChatLanguageModel streamingChatLanguageModel;
+    private final ChatLanguageModel chatLanguageModel;
     private final AppService appService;
     private final AppVersionService versionService;
     private final ChatMessageService chatMessageService;
@@ -75,7 +75,7 @@ public class AiEditService {
                 }
 
                 EditAssistant assistant = AiServices.builder(EditAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .tools(editTools)
                         .systemMessageProvider(memId -> systemPrompt)
                         .build();

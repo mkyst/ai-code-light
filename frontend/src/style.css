@@ -1,27 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: #1a1a28;
-  --bg-card-hover: #202030;
-  --accent-primary: #6c5ce7;
-  --accent-secondary: #a29bfe;
-  --accent-glow: rgba(108, 92, 231, 0.4);
-  --accent-pink: #fd79a8;
-  --accent-teal: #00cec9;
-  --accent-amber: #fdcb6e;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255,255,255,0.7);
-  --text-muted: rgba(255,255,255,0.4);
-  --border: rgba(255,255,255,0.08);
-  --border-active: rgba(108, 92, 231, 0.6);
-  --gradient-hero: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #fd79a8 100%);
-  --gradient-card: linear-gradient(135deg, rgba(108,92,231,0.1) 0%, rgba(253,121,168,0.05) 100%);
+  /* BACKGROUNDS (Light Theme) */
+  --bg-primary: #f8fafc;
+  /* Main background - light slate */
+  --bg-secondary: #ffffff;
+  /* Secondary panels - white */
+  --bg-card: rgba(255, 255, 255, 0.7);
+  /* Translucent cards */
+  --bg-card-hover: rgba(255, 255, 255, 0.9);
+
+  /* ACCENTS (Blue/Purple Gradient Vibe) */
+  --accent-primary: #6366f1;
+  /* Indigo */
+  --accent-secondary: #8b5cf6;
+  /* Violet */
+  --accent-glow: rgba(99, 102, 241, 0.25);
+  --accent-pink: #d946ef;
+  /* Fuchsia */
+  --accent-teal: #06b6d4;
+  --accent-amber: #f59e0b;
+
+  /* TEXT (Dark on Light) */
+  --text-primary: #1e293b;
+  /* Slate 800 - main text */
+  --text-secondary: #475569;
+  /* Slate 600 - secondary text */
+  --text-muted: #94a3b8;
+  /* Slate 400 - hints/disabled */
+
+  /* BORDERS AND GRADIENTS */
+  --border: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(99, 102, 241, 0.5);
+  --gradient-hero: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+  --gradient-card: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(217, 70, 239, 0.05) 100%);
+
+  /* MISC */
   --radius: 16px;
   --radius-sm: 8px;
-  --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.3);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 4px 24px rgba(99, 102, 241, 0.15);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -31,7 +49,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg-primary);
@@ -44,33 +63,48 @@ html, body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 3px;
+}
 
 /* Arco Theme Overrides */
 .arco-btn-primary {
   background: var(--gradient-hero) !important;
   border: none !important;
 }
-.arco-input, .arco-textarea {
+
+.arco-input,
+.arco-textarea {
   background: var(--bg-card) !important;
   border-color: var(--border) !important;
   color: var(--text-primary) !important;
 }
-.arco-input:focus, .arco-textarea:focus {
+
+.arco-input:focus,
+.arco-textarea:focus {
   border-color: var(--accent-primary) !important;
   box-shadow: 0 0 0 2px var(--accent-glow) !important;
 }
 
 /* Glass Card */
 .glass-card {
-  background: rgba(26, 26, 40, 0.8);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: var(--transition);
 }
+
 .glass-card:hover {
   border-color: var(--border-active);
   box-shadow: var(--shadow-glow);
@@ -99,10 +133,12 @@ html, body {
   box-shadow: 0 4px 20px var(--accent-glow);
   font-family: 'Inter', sans-serif;
 }
+
 .glow-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px var(--accent-glow);
 }
+
 .glow-btn:active {
   transform: translateY(0);
 }
@@ -115,7 +151,9 @@ html, body {
   pointer-events: none;
   z-index: 0;
 }
-.animated-bg::before, .animated-bg::after {
+
+.animated-bg::before,
+.animated-bg::after {
   content: '';
   position: absolute;
   border-radius: 50%;
@@ -123,6 +161,7 @@ html, body {
   opacity: 0.15;
   animation: float 8s ease-in-out infinite;
 }
+
 .animated-bg::before {
   width: 600px;
   height: 600px;
@@ -130,6 +169,7 @@ html, body {
   top: -200px;
   left: -100px;
 }
+
 .animated-bg::after {
   width: 500px;
   height: 500px;
@@ -140,22 +180,47 @@ html, body {
 }
 
 @keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
 }
 
 /* Pulse animation */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Fade in animation */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 .fade-in {
   animation: fadeInUp 0.6s ease forwards;
 }
@@ -170,6 +235,18 @@ html, body {
   font-size: 12px;
   font-weight: 500;
 }
-.badge-done { background: rgba(0,206,201,0.15); color: var(--accent-teal); }
-.badge-generating { background: rgba(108,92,231,0.15); color: var(--accent-secondary); }
-.badge-published { background: rgba(0,184,148,0.15); color: #00b894; }
+
+.badge-done {
+  background: rgba(0, 206, 201, 0.15);
+  color: var(--accent-teal);
+}
+
+.badge-generating {
+  background: rgba(108, 92, 231, 0.15);
+  color: var(--accent-secondary);
+}
+
+.badge-published {
+  background: rgba(0, 184, 148, 0.15);
+  color: #00b894;
+}
