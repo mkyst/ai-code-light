@@ -25,14 +25,16 @@
       <div v-if="activeTab === 'overview'" class="tab-content">
         <h2 class="tab-title">📊 数据概览</h2>
         <div class="stats-grid">
-          <div v-for="card in statsCards" :key="card.key" class="stat-card glass-card">
+          <div v-for="card in statsCards" :key="card.key"
+            :class="['stat-card', 'glass-card', { clickable: card.targetTab }]"
+            @click="card.targetTab && (activeTab = card.targetTab)">
             <div class="stat-icon">{{ card.icon }}</div>
             <div class="stat-info">
-              <div class="stat-value">{{ overview[card.key] ?? '...' }}</div>
+              <div class="stat-value">{{ overviewData?.[card.key] ?? '...' }}</div>
               <div class="stat-label">{{ card.label }}</div>
             </div>
             <div class="stat-today" v-if="card.todayKey">
-              <span class="today-badge">今日 +{{ overview[card.todayKey] ?? 0 }}</span>
+              <span class="today-badge">今日 +{{ overviewData?.[card.todayKey] ?? 0 }}</span>
             </div>
           </div>
         </div>
@@ -211,7 +213,7 @@ import { adminApi } from '../api/admin'
 import { Message, Modal } from '@arco-design/web-vue'
 
 const activeTab = ref('overview')
-const overview = ref({})
+const overviewData = ref({})
 const aiLogs = ref([])
 const users = ref([])
 const userPage = ref(1)
@@ -230,10 +232,10 @@ const navItems = [
 ]
 
 const statsCards = [
-  { key: 'totalUsers', todayKey: 'todayUsers', icon: '👥', label: '注册用户' },
-  { key: 'totalApps', todayKey: 'todayApps', icon: '📱', label: '创建应用' },
-  { key: 'publishedApps', todayKey: null, icon: '🌐', label: '已发布应用' },
-  { key: 'totalAiCalls', todayKey: 'todayAiCalls', icon: '🤖', label: 'AI 调用次数' }
+  { key: 'totalUsers', todayKey: 'todayUsers', icon: '👥', label: '注册用户', targetTab: 'users' },
+  { key: 'totalApps', todayKey: 'todayApps', icon: '📱', label: '创建应用', targetTab: 'apps' },
+  { key: 'publishedApps', todayKey: null, icon: '🌐', label: '已发布应用', targetTab: 'apps' },
+  { key: 'totalAiCalls', todayKey: 'todayAiCalls', icon: '🤖', label: 'AI 调用次数', targetTab: 'ai-logs' }
 ]
 
 const statusLabel = (s) => {
@@ -247,24 +249,35 @@ const formatDateTime = (d) => d ? new Date(d).toLocaleString('zh-CN', { month: '
 
 async function loadOverview() {
   try {
-    overview.value = await adminApi.getOverview()
+    console.log('Loading overview data...')
+    overviewData.value = await adminApi.getOverview()
+    console.log('Overview data loaded:', overviewData.value)
     const logRes = await adminApi.getAiLogs()
     aiLogs.value = logRes.records || []
   } catch (e) {
-    Message.error('加载失败，请确认您是管理员账号')
+    console.error('Failed to load overview:', e)
+    Message.error('加载数据概览失败：' + (e.response?.data?.message || e.message))
   }
 }
 
 async function loadUsers(page = 1) {
-  const res = await adminApi.getUsers(page, 16, userKeyword.value)
-  users.value = res.records || []
-  userTotal.value = res.total || 0
+  try {
+    const res = await adminApi.getUsers(page, 16, userKeyword.value)
+    users.value = res.records || []
+    userTotal.value = res.total || 0
+  } catch (e) {
+    console.error('Failed to load users:', e)
+  }
 }
 
 async function loadApps(page = 1) {
-  const res = await adminApi.getApps(page, 16, appStatusFilter.value)
-  apps.value = res.records || []
-  appTotal.value = res.total || 0
+  try {
+    const res = await adminApi.getApps(page, 16, appStatusFilter.value)
+    apps.value = res.records || []
+    appTotal.value = res.total || 0
+  } catch (e) {
+    console.error('Failed to load apps:', e)
+  }
 }
 
 function searchUsers() {
@@ -354,7 +367,9 @@ onMounted(async () => {
 
 /* Stats Grid */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-.stat-card { display: flex; align-items: center; gap: 16px; padding: 20px; }
+.stat-card { display: flex; align-items: center; gap: 16px; padding: 20px; transition: var(--transition); }
+.stat-card.clickable { cursor: pointer; }
+.stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .stat-icon { font-size: 36px; line-height: 1; }
 .stat-info { flex: 1; }
 .stat-value { font-size: 28px; font-weight: 700; line-height: 1; }

@@ -35,7 +35,7 @@ const routes = [
         path: '/admin',
         name: 'Admin',
         component: () => import('../views/AdminView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
         path: '/profile',
@@ -54,6 +54,8 @@ router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     if (to.meta.requiresAuth && !userStore.isLoggedIn) {
         next('/login')
+    } else if (to.meta.requiresAdmin && !userStore.isAdmin) {
+        next('/')
     } else if (to.meta.guest && userStore.isLoggedIn) {
         next('/workspace')
     } else {

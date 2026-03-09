@@ -31,6 +31,12 @@
         <button class="icon-btn" title="版本历史" @click="showVersions = !showVersions" v-if="currentApp">
           🕐 历史
         </button>
+        <button class="icon-btn primary" title="云端部署" @click="publishApp" v-if="currentApp && currentApp.status === 'DONE'" :disabled="publishing">
+          {{ publishing ? '发布中...' : '🚀 部署' }}
+        </button>
+        <button class="icon-btn" title="下载源码" @click="downloadSource" v-if="currentApp && currentApp.status === 'DONE'">
+          📦 下载
+        </button>
         <router-link to="/apps">
           <a-button size="small">我的应用</a-button>
         </router-link>
@@ -219,6 +225,7 @@ const previewFrame = ref(null)
 const showVersions = ref(false)
 const versions = ref([])
 const selectedElement = ref('')
+const publishing = ref(false)
 
 const htmlCode = ref('')
 const cssCode = ref('')
@@ -490,6 +497,30 @@ async function saveTitle() {
   }
 }
 
+async function publishApp() {
+  if (!currentApp.value) return
+  publishing.value = true
+  try {
+    const updated = await appApi.publish(currentApp.value.id)
+    currentApp.value = updated
+    Message.success('应用已发布到云端！')
+  } catch (err) {
+    Message.error('发布失败：' + (err.response?.data?.message || err.message))
+  } finally {
+    publishing.value = false
+  }
+}
+
+function downloadSource() {
+  if (!currentApp.value) return
+  const url = appApi.downloadUrl(currentApp.value.id)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${currentApp.value.title || 'app'}.zip`
+  a.click()
+  Message.success('开始下载源码...')
+}
+
 const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
 
 // Load existing app if appId is passed in query
@@ -535,6 +566,16 @@ onMounted(async () => {
   transition: var(--transition); font-family: 'Inter', sans-serif;
 }
 .icon-btn:hover { border-color: var(--accent-primary); color: var(--accent-secondary); }
+.icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.icon-btn.primary {
+  background: var(--gradient-hero);
+  color: white;
+  border-color: transparent;
+}
+.icon-btn.primary:hover {
+  box-shadow: 0 2px 10px var(--accent-glow);
+  transform: translateY(-1px);
+}
 
 /* Mode Switcher */
 .mode-switcher { display: flex; gap: 0; background: var(--bg-card); border-radius: 10px; padding: 3px; }

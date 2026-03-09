@@ -1,5 +1,6 @@
 <template>
   <div class="apps-view">
+    <button class="back-btn" @click="$router.push('/profile')">← 个人中心</button>
     <!-- Header -->
     <header class="apps-header">
       <div class="header-inner">
@@ -11,8 +12,8 @@
           <router-link to="/workspace">
             <button class="glow-btn" style="font-size: 14px; padding: 8px 20px">+ 新建应用</button>
           </router-link>
-          <a-avatar :size="32">
-            <img :src="userStore.user?.avatar" />
+          <a-avatar :size="32" style="cursor: pointer" @click="$router.push('/profile')">
+            <img :src="resolveAvatar(userStore.user?.avatar)" />
           </a-avatar>
         </div>
       </div>
@@ -86,6 +87,7 @@ import { Message, Modal } from '@arco-design/web-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const resolveAvatar = (url) => (url && url.startsWith('/uploads')) ? 'http://localhost:8080' + url : (url || '')
 const apps = ref([])
 const loading = ref(false)
 const activeTab = ref('my')
@@ -162,12 +164,42 @@ async function deleteApp(app) {
 }
 
 watch(activeTab, loadApps)
-onMounted(loadApps)
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    userStore.fetchMe().catch(() => {})
+  }
+  loadApps()
+})
 </script>
 
 <style scoped>
-.apps-view { min-height: 100vh; position: relative; z-index: 1; }
-.apps-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+.apps-view { min-height: 100vh; position: relative; z-index: 1; padding-top: 70px; }
+.back-btn {
+  position: fixed;
+  top: 14px;
+  left: 24px;
+  background: rgba(108,92,231,0.1);
+  border: 1px solid rgba(108,92,231,0.3);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.back-btn:hover {
+  background: rgba(108,92,231,0.2);
+  border-color: var(--accent-primary);
+  transform: translateX(-2px);
+}
+.apps-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); position: fixed; top: 0; left: 0; right: 0; z-index: 50; }
 .header-inner {
   max-width: 1200px; margin: 0 auto; padding: 14px 24px;
   display: flex; align-items: center; gap: 24px;

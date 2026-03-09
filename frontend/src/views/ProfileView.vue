@@ -22,6 +22,8 @@
         </div>
         <p class="join-date">注册于 {{ formatDate(user.createdAt) }}</p>
         <router-link to="/apps" class="view-apps-btn">查看我的应用 →</router-link>
+        <router-link to="/admin" class="view-apps-btn admin-btn" v-if="userStore.isAdmin">🏢 管理后台 →</router-link>
+        <button class="logout-btn" @click="handleLogout">🚪 退出登录</button>
       </div>
 
       <!-- Right: edit tabs -->
@@ -180,6 +182,11 @@ async function savePassword() {
 }
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('zh-CN') : ''
+
+function handleLogout() {
+  userStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -222,6 +229,25 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('zh-CN') : ''
 .join-date { font-size: 12px; color: var(--text-muted); }
 .view-apps-btn { font-size: 13px; color: var(--accent-secondary); text-decoration: none; }
 .view-apps-btn:hover { text-decoration: underline; }
+.admin-btn { color: #f59e0b; font-weight: 500; }
+.logout-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
 
 .profile-right { display: flex; flex-direction: column; gap: 0; }
 .tab-bar { display: flex; gap: 0; background: var(--bg-card); border-radius: 10px 10px 0 0; padding: 4px; border: 1px solid var(--border); border-bottom: none; }

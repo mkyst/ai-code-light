@@ -11,8 +11,8 @@ spring:
     name: ai-code-platform
   datasource:
     url: jdbc:mysql://localhost:3306/ai_code?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
@@ -45,7 +45,7 @@ mybatis-plus:
 
 # JWT
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:aicode_default_jwt_secret_key_needs_to_be_long_enough_for_hs256}
   expiration: 86400000  # 24 hours
 
 # LangChain4j - Qwen via OpenAI-compatible API
@@ -53,7 +53,7 @@ langchain4j:
   open-ai:
     chat-model:
       base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
-      api-key: ${QWEN_API_KEY}
+      api-key: ${QWEN_API_KEY:sk-cf7e227908274a9c9c163abce802a3c4}
       model-name: qwen-plus
       temperature: 0.7
       max-tokens: 8192
@@ -62,7 +62,7 @@ langchain4j:
       log-responses: true
     streaming-chat-model:
       base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
-      api-key: ${QWEN_API_KEY}
+      api-key: ${QWEN_API_KEY:sk-cf7e227908274a9c9c163abce802a3c4}
       model-name: qwen-plus
       temperature: 0.7
       max-tokens: 8192

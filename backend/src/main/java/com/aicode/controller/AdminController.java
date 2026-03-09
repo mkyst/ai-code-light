@@ -159,7 +159,7 @@ public class AdminController {
     // ===== Admin check (whitelist-based for now) =====
     private void requireAdmin() {
         User currentUser = userMapper.selectById(SecurityUtil.getCurrentUserId());
-        if (currentUser == null || !"admin".equals(currentUser.getRole())) {
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw BusinessException.forbidden();
         }
     }
